@@ -13,6 +13,8 @@
     "mocha": "^5.2.0"
   },
   "devDependencies": {
-    "jsdoc": "^3.5.5"
+    "better-docs": "^1.1.2",
+    "jsdoc": "^3.5.5",
+    "jsdoc-mermaid": "^1.0.0"
   }
 }

@@ -14,6 +14,7 @@ const axios = require('axios')
  *
  * @see  https://developer.atlassian.com/cloud/jira/platform/rest/v3
  * @todo  implement all methods
+ * @category Jira
  */
 class Jira {
 
@@ -36,7 +37,7 @@ class Jira {
   }
 
   /**
-   * @typedef {JiraProjects} JiraProjects
+   * @typedef {Object} Jira~JiraProject
    *
    * @property {String} assigneeType  indicates if project is assigned
    * @property {Object} avatarUrls    project avatars of sizes
@@ -59,7 +60,7 @@ class Jira {
    * List of all projects for given category
    * @param  {Object} options
    * @param  {Number} [options.categoryId=1000] category id
-   * @return {JiraProjects[]}                   projects returned by the API
+   * @return {Promise<Array<Jira~JiraProject>>}  projects returned by the API
    */
   async projects({ categoryId = 1000 }) {
     const maxResults = 200
@@ -69,6 +70,13 @@ class Jira {
     return response.data.values
   }
 
+  /**
+   * Returns project for given key
+   * @param  {String} options.projectKey  project key
+   * @return {Promise<Jira~JiraProject>}                project returned by the API
+   * 
+   * @see  https://developer.atlassian.com/cloud/jira/platform/rest/v3#api-api-3-project-get
+   */
   async project({ projectKey }) {
     const response = await this.baseClient.get(`project/${projectKey}`, {
       expand: 'issueTypes,lead,description',
@@ -76,6 +84,33 @@ class Jira {
     return response.data
   }
 
+  /**
+   * @typedef {Object} Jira~JiraIssue
+   * @property {Object} fields
+   * @property {Object} fields.aggregateprogress progress of an issuse
+   * @property {Jira~JiraUser} [fields.assignee] who is assigned to it
+   * @property {Jira~JiraUser} fields.creator    who created the issue
+   * @property {String} fields.description       description of an issue
+   * @property {String} fields.summary           issue summary
+   * @property {Jira~JiraEpic} [fields.epic]     sprint epic in which issue resides
+   * @property {Object} fields.issuetype         Type of an issue 
+   * @property {String} id                       Issue id in jira
+   * @property {String} key                      Uniq issue key
+   * @property {String} self                     link to the issue details endpoint
+   *
+   * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3#api-api-3-issue-issueIdOrKey-get
+   */
+
+
+  /**
+   * Fetch issues for given project
+   * @param  {Object} options
+   * @param  {String} options.jql             query written in Jira Query Language 
+   * @param  {Array<String>}  [options.fields=['summary', 'status', 'assignee', 'timetracking']] 
+   *                                          list non standard fields which should
+   *                                          be included into a response
+   * @return {Promise<Array<Jira~JiraIssue>>}                    list of issues which match the jql
+   */
   async search({ jql, fields = ['summary', 'status', 'assignee', 'timetracking'] }) {
     const response = await this.baseClient.post('search', {
       jql,
@@ -85,11 +120,35 @@ class Jira {
     return response.data.issues
   }
 
+  /**
+   * @typedef {Object} Jira~JiraUser
+   * @property {Object} ActorUser
+   * @property {String} ActorUser.accountId
+   * @property {String} avatarUrl
+   * @property {String} displayName
+   * @property {Number} id
+   * @property {String} name
+   * @property {String} type
+   */
+
+  /**
+   * Return all users assigned to the project by role
+   * @param  {Object} options
+   * @param  {String} options.projectKey project key
+   * @param  {String} options.role       user role in the project
+   * @return {Promise<Array<Jira~JiraUser>>}                 
+   */
   async projectRoles({ projectKey, role }) {
     const response = await this.baseClient.get(`project/${projectKey}/role/${role}`)
     return response.data.actors
   }
 
+  /**
+   * Return all jira users for given group
+   * @param  {Object} options
+   * @param  {String} options.groupname name of a group
+   * @return {Promise<Jira~JiraUser>}
+   */
   async usersByGroup({ groupname }) {
     const response = await this.baseClient.get('group/member', {
       params: { groupname, maxResults: 200, includeInactiveUsers: true },
@@ -97,6 +156,10 @@ class Jira {
     return response.data.values
   }
 
+  /**
+   * List of project categories defined in your Jira instance
+   * @return {Promise<JiraProjectCategory>} [description]
+   */
   async categories() {
     await this.baseClient.get('projectCategory')
   }

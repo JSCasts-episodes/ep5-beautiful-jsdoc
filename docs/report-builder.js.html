@@ -1,8 +1,10 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Starting guide</title>
+    <title>JSDoc: report-builder.js</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -48,22 +50,42 @@
             <div class="column is-9-desktop">
                 <div class="content" id="main-content-wrapper">
                     <header class="page-title">
-                        <p>Tutorial</p>
-                        <h1>Starting guide</h1>
+                        <p>Source</p>
+                        <h1>report-builder.js</h1>
                     </header>
                     
-                    <section>
+                    
 
-<header>
+
+
     
-</header>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/**
+ * Report Builder
+ *
+ * @mermaid
+ * sequenceDiagram
+ *   participant App
+ *   participant Jira
+ *   App->>Jira:project({ projectId })
+ *   Jira->>App:ProjectObject
+ *   App->>Jira:search()
+ *   Jira->>App:IssueObject[]
+ */
+class ReportBuilder {
+  constructor(args) {
+    // code
+  }
 
-<article>
-    <h3>Example starting guide</h3><p>This is an example tutorial file. File will be shown on the sidebar in tutrials section. You can add here whatever you like. Even you can link other parts of the documentation like that <a href="Jira.html">Jira</a></p>
-<pre class="prettyprint source lang-javascript"><code>const example = new Jira()....</code></pre>
-</article>
+  // methods
+}</code></pre>
+        </article>
+    </section>
 
-</section>
+
+
 
                 </div>
             </div>

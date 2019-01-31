@@ -5,7 +5,9 @@
         "excludePattern": "(node_modules/|docs)"
     },
     "plugins": [
-        "plugins/markdown"
+        "plugins/markdown",
+        "jsdoc-mermaid",
+        "node_modules/better-docs/category"
     ],
     "opts": {
         "encoding": "utf8",
@@ -13,6 +15,7 @@
         "destination": "docs/",
         "recurse": true,
         "verbose": true,
-        "tutorials": "./tutorials"
+        "tutorials": "./tutorials",
+        "template": "node_modules/better-docs/"
     }
 }

@@ -1,25 +1,60 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: jira-client.js</title>
+    <title>JSDoc: jira-client.js</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link href="https://fonts.googleapis.com/css?family=Muli:100,400,700|Oswald:300|Inconsolata,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/app.min.css">
 </head>
 
 <body>
-
-<div id="main">
-
-    <h1 class="page-title">Source: jira-client.js</h1>
-
-    
+    <div id="stickyNavbarOverlay"></div>
+    <div class="top-navbar">
+        <div class="container">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    
+                    
+                        <h1 class="navbar-item">Documentation</h1>
+                    
+                    <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+                
+            </nav>
+        </div>
+    </div>
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3" id="sidebarNav">
+                <div class="sidebar">
+                    <nav>
+                        <h2><a href="index.html">Home</a></h2><div class="category"><h3>Tutorials</h3><ul><li><a href="tutorial-starting-guide.html">Starting guide</a></li></ul><h3>Classes</h3><ul><li><a href="ReportBuilder.html">ReportBuilder</a></li></ul></div><div class="category"><h2>Jira</h2><h3>Classes</h3><ul><li><a href="Jira.html">Jira</a></li></ul></div>
+                    </nav>
+                </div>
+            </div>
+            <div class="column is-9-desktop">
+                <div class="content" id="main-content-wrapper">
+                    <header class="page-title">
+                        <p>Source</p>
+                        <h1>jira-client.js</h1>
+                    </header>
+                    
+                    
 
 
 
@@ -42,6 +77,7 @@
  *
  * @see  https://developer.atlassian.com/cloud/jira/platform/rest/v3
  * @todo  implement all methods
+ * @category Jira
  */
 class Jira {
 
@@ -64,7 +100,7 @@ class Jira {
   }
 
   /**
-   * @typedef {JiraProjects} JiraProjects
+   * @typedef {Object} Jira~JiraProject
    *
    * @property {String} assigneeType  indicates if project is assigned
    * @property {Object} avatarUrls    project avatars of sizes
@@ -87,7 +123,7 @@ class Jira {
    * List of all projects for given category
    * @param  {Object} options
    * @param  {Number} [options.categoryId=1000] category id
-   * @return {JiraProjects[]}                   projects returned by the API
+   * @return {Promise&lt;Array&lt;Jira~JiraProject>>}  projects returned by the API
    */
   async projects({ categoryId = 1000 }) {
     const maxResults = 200
@@ -97,6 +133,13 @@ class Jira {
     return response.data.values
   }
 
+  /**
+   * Returns project for given key
+   * @param  {String} options.projectKey  project key
+   * @return {Promise&lt;Jira~JiraProject>}                project returned by the API
+   * 
+   * @see  https://developer.atlassian.com/cloud/jira/platform/rest/v3#api-api-3-project-get
+   */
   async project({ projectKey }) {
     const response = await this.baseClient.get(`project/${projectKey}`, {
       expand: 'issueTypes,lead,description',
@@ -104,6 +147,33 @@ class Jira {
     return response.data
   }
 
+  /**
+   * @typedef {Object} Jira~JiraIssue
+   * @property {Object} fields
+   * @property {Object} fields.aggregateprogress progress of an issuse
+   * @property {Jira~JiraUser} [fields.assignee] who is assigned to it
+   * @property {Jira~JiraUser} fields.creator    who created the issue
+   * @property {String} fields.description       description of an issue
+   * @property {String} fields.summary           issue summary
+   * @property {Jira~JiraEpic} [fields.epic]     sprint epic in which issue resides
+   * @property {Object} fields.issuetype         Type of an issue 
+   * @property {String} id                       Issue id in jira
+   * @property {String} key                      Uniq issue key
+   * @property {String} self                     link to the issue details endpoint
+   *
+   * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3#api-api-3-issue-issueIdOrKey-get
+   */
+
+
+  /**
+   * Fetch issues for given project
+   * @param  {Object} options
+   * @param  {String} options.jql             query written in Jira Query Language 
+   * @param  {Array&lt;String>}  [options.fields=['summary', 'status', 'assignee', 'timetracking']] 
+   *                                          list non standard fields which should
+   *                                          be included into a response
+   * @return {Promise&lt;Array&lt;Jira~JiraIssue>>}                    list of issues which match the jql
+   */
   async search({ jql, fields = ['summary', 'status', 'assignee', 'timetracking'] }) {
     const response = await this.baseClient.post('search', {
       jql,
@@ -113,11 +183,35 @@ class Jira {
     return response.data.issues
   }
 
+  /**
+   * @typedef {Object} Jira~JiraUser
+   * @property {Object} ActorUser
+   * @property {String} ActorUser.accountId
+   * @property {String} avatarUrl
+   * @property {String} displayName
+   * @property {Number} id
+   * @property {String} name
+   * @property {String} type
+   */
+
+  /**
+   * Return all users assigned to the project by role
+   * @param  {Object} options
+   * @param  {String} options.projectKey project key
+   * @param  {String} options.role       user role in the project
+   * @return {Promise&lt;Array&lt;Jira~JiraUser>>}                 
+   */
   async projectRoles({ projectKey, role }) {
     const response = await this.baseClient.get(`project/${projectKey}/role/${role}`)
     return response.data.actors
   }
 
+  /**
+   * Return all jira users for given group
+   * @param  {Object} options
+   * @param  {String} options.groupname name of a group
+   * @return {Promise&lt;Jira~JiraUser>}
+   */
   async usersByGroup({ groupname }) {
     const response = await this.baseClient.get('group/member', {
       params: { groupname, maxResults: 200, includeInactiveUsers: true },
@@ -125,6 +219,10 @@ class Jira {
     return response.data.values
   }
 
+  /**
+   * List of project categories defined in your Jira instance
+   * @return {Promise&lt;JiraProjectCategory>} [description]
+   */
   async categories() {
     await this.baseClient.get('projectCategory')
   }
@@ -138,19 +236,23 @@ module.exports = Jira
 
 
 
-</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Jira.html">Jira</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-starting-guide.html">Starting guide</a></li></ul><h3><a href="global.html">Global</a></h3>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 30 2018 22:09:28 GMT+0100 (Central European Standard Time)
+<footer class="footer">
+    <div class="content has-text-centered">
+        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Jan 31 2019 22:53:04 GMT+0100 (Central European Standard Time)</p>
+        <p class="sidebar-created-by">
+            <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+            <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers</a>
+        </p>
+    </div>
 </footer>
 
 <script> prettyPrint(); </script>
+<script src="scripts/app.min.js"></script>
 <script src="scripts/linenumber.js"> </script>
 </body>
 </html>
